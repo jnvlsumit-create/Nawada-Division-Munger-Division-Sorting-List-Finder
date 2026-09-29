@@ -35,8 +35,8 @@
     </div>
 
     <script>
-        // PASTE YOUR PUBLISHED GOOGLE SHEET CSV LINK HERE
-        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPRX8-gLVHqHGsVRrqBqhVpeF1oBdQ_DQ-1vBS49OPtEqFisswvlEn2UEb3a881A/pubhtml";
+        // Using your specific Google Sheet CSV link
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPRX8-gLVHqHGsVRrqBqhVpeF1oBdQ_DQ-1vBS49OPtEqFisswvlEn2UEb3a881A/pub?output=csv";
         
         let directoryData = [];
         const searchInput = document.getElementById('searchInput');
@@ -49,18 +49,32 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                // Map the CSV headers to our expected format
-                directoryData = results.data.map(row => ({
-                    so_name: row['NAME OF SO'] || "",
-                    office_name: row['Office Name'] || "",
-                    villages: row['Village Name'] || ""
-                }));
+                // Keep track of the last seen SO Name and Office Name for merged cells/forward filling
+                let lastSoName = "";
+                let lastOfficeName = "";
+
+                // Map the CSV headers to our expected format and handle empty cells like Excel forward-fill
+                directoryData = results.data.map(row => {
+                    // If the cell has text, use it. Otherwise, use the last seen text.
+                    const currentSoName = row['NAME OF SO'] ? row['NAME OF SO'].trim() : lastSoName;
+                    const currentOfficeName = row['Office Name'] ? row['Office Name'].trim() : lastOfficeName;
+                    
+                    // Update our trackers
+                    lastSoName = currentSoName;
+                    lastOfficeName = currentOfficeName;
+
+                    return {
+                        so_name: currentSoName,
+                        office_name: currentOfficeName,
+                        villages: row['Village Name'] || ""
+                    };
+                }).filter(item => item.villages.trim() !== ""); // Filter out rows that have no villages
                 
                 loadingIndicator.style.display = 'none';
                 renderResults(directoryData);
             },
             error: function(err) {
-                loadingIndicator.innerText = "Error loading data. Make sure the Google Sheet is published to the web.";
+                loadingIndicator.innerText = "Error loading data. Make sure the Google Sheet is published to the web properly.";
                 console.error(err);
             }
         });
