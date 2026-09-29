@@ -3,429 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nawada Division & Munger Dn Search</title>
-    
-    <!-- Tailwind CSS for styling -->
+    <title>Directory Search</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- SheetJS for Excel parsing -->
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-        
-        /* Custom scrollbar for the table container */
-        .table-container::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-        .table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* Highlight text matching search */
-        .highlight {
-            background-color: #fef08a; /* Tailwind yellow-200 */
-            color: #1e293b;
-            padding: 0 2px;
-            border-radius: 2px;
-            font-weight: 500;
-        }
-    </style>
+    <!-- PapaParse for converting CSV to JSON -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-gray-50 text-gray-800 min-h-screen p-6">
 
-    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <h1 class="font-bold text-xl text-slate-900 tracking-tight">Nawada & Munger Directory</h1>
-            </div>
-            <a href="https://github.com" target="_blank" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-                GitHub Hosted
-            </a>
-        </div>
-    </header>
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-blue-600 mb-2">Office & Village Directory</h1>
+            <p class="text-gray-500">Search by Office Name, SO Name, or Village</p>
+        </header>
 
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
-        
-        <!-- Upload Section -->
-        <div id="uploadSection" class="w-full max-w-2xl mx-auto mt-10">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Upload Directory File</h2>
-                <p class="text-slate-500">Please upload <span class="font-semibold text-blue-600">Nawada Division and Munger Dn_2.xlsx</span> to begin searching.</p>
-            </div>
-
-            <div id="dropZone" class="border-2 border-dashed border-slate-300 rounded-xl bg-white p-12 text-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer relative group">
-                <input type="file" id="fileInput" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                <div class="pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-slate-400 group-hover:text-blue-500 mb-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p class="text-lg font-medium text-slate-700">Click to upload or drag and drop</p>
-                    <p class="text-sm text-slate-500 mt-1">Excel files only (.xlsx, .xls)</p>
-                </div>
-            </div>
-
-            <!-- Loading Indicator -->
-            <div id="loadingIndicator" class="hidden mt-8 text-center">
-                <div class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-sm border border-slate-200">
-                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="font-medium text-slate-700">Processing Excel file...</span>
-                </div>
-            </div>
+        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="Type to search..." 
+                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+            >
         </div>
 
-        <!-- Main Application Section (Hidden by default) -->
-        <div id="appSection" class="hidden flex-col h-full space-y-6">
-            
-            <!-- Controls: Search and File Info -->
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                <div class="relative w-full max-w-md flex-shrink-0">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-500 focus:outline-none focus:placeholder-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-shadow" placeholder="Search by SO, Office, or Village Name...">
-                </div>
-                
-                <div class="flex items-center gap-4 text-sm w-full sm:w-auto justify-between sm:justify-end">
-                    <div class="text-slate-600">
-                        Showing <span id="recordCount" class="font-bold text-slate-900">0</span> records
-                    </div>
-                    <button id="resetBtn" class="text-blue-600 hover:text-blue-800 font-medium px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors">
-                        Load New File
-                    </button>
-                </div>
-            </div>
-
-            <!-- Data Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-grow flex flex-col min-h-[400px]">
-                <div class="overflow-auto table-container flex-grow">
-                    <table class="min-w-full divide-y divide-slate-200 relative">
-                        <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
-                            <tr>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-1/4">Name of SO</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-1/4">Office Name</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-1/2">Village Name(s)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="bg-white divide-y divide-slate-100">
-                            <!-- Rows will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Empty State within table -->
-                <div id="noResults" class="hidden py-12 text-center flex-grow flex flex-col items-center justify-center">
-                    <svg class="h-12 w-12 text-slate-300 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-slate-500 text-lg font-medium">No matches found for your search.</p>
-                    <p class="text-slate-400 text-sm mt-1">Try adjusting your keywords.</p>
-                </div>
-            </div>
+        <div id="loading" class="text-center text-gray-500 py-10">
+            Loading data from Google Drive...
         </div>
-    </main>
+
+        <div id="results" class="grid gap-4 md:grid-cols-2">
+            <!-- Results will be injected here -->
+        </div>
+    </div>
 
     <script>
-        // DOM Elements
-        const uploadSection = document.getElementById('uploadSection');
-        const appSection = document.getElementById('appSection');
-        const fileInput = document.getElementById('fileInput');
-        const dropZone = document.getElementById('dropZone');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const tableBody = document.getElementById('tableBody');
+        // PASTE YOUR PUBLISHED GOOGLE SHEET CSV LINK HERE
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/YOUR_LINK_HERE/pub?output=csv";
+        
+        let directoryData = [];
         const searchInput = document.getElementById('searchInput');
-        const recordCount = document.getElementById('recordCount');
-        const noResults = document.getElementById('noResults');
-        const resetBtn = document.getElementById('resetBtn');
+        const resultsContainer = document.getElementById('results');
+        const loadingIndicator = document.getElementById('loading');
 
-        // Application State
-        let parsedData = []; // Holds the processed complete dataset
-        let currentSearchQuery = "";
-
-        // Event Listeners for File Drag & Drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => {
-                dropZone.classList.add('border-blue-500', 'bg-blue-50');
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => {
-                dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-            }, false);
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            let dt = e.dataTransfer;
-            let files = dt.files;
-            handleFiles(files);
-        });
-
-        fileInput.addEventListener('change', function(e) {
-            handleFiles(this.files);
-        });
-
-        // Reset App functionality
-        resetBtn.addEventListener('click', () => {
-            appSection.classList.add('hidden');
-            uploadSection.classList.remove('hidden');
-            fileInput.value = ''; // Reset input
-            parsedData = [];
-            searchInput.value = '';
-        });
-
-        // File Handler
-        function handleFiles(files) {
-            if (files.length === 0) return;
-            
-            const file = files[0];
-            const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
-            const validExts = ['.xlsx', '.xls'];
-            
-            const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-            
-            if (!validTypes.includes(file.type) && !validExts.includes(fileExt)) {
-                alert("Please upload a valid Excel file (.xlsx or .xls)");
-                return;
-            }
-
-            // Show loading state
-            dropZone.classList.add('hidden');
-            loadingIndicator.classList.remove('hidden');
-
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    
-                    // Get first worksheet
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    // Convert to JSON with empty strings for empty cells to help with processing
-                    const rawJson = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
-                    
-                    processExcelData(rawJson);
-                    
-                } catch (error) {
-                    console.error("Error parsing Excel file:", error);
-                    alert("There was an error reading the Excel file. Please ensure it is not corrupted.");
-                    resetUI();
-                }
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
-
-        
-        // Process Raw JSON and apply forward-fill logic for merged columns
-        function processExcelData(rawData) {
-            parsedData = [];
-            
-            let lastSO = "";
-            let lastOffice = "";
-
-            // Keys to look for (handling possible trailing spaces from Excel headers)
-            const soKeyOpts = ['NAME OF SO', 'NAME OF SO ', 'name of so'];
-            const officeKeyOpts = ['Office Name', 'Office Name ', 'office name'];
-            const villageKeyOpts = ['Village Name', 'Village Name ', 'village name'];
-
-            rawData.forEach((row, index) => {
-                // Find actual keys in the row
-                let rowKeys = Object.keys(row);
+        // Fetch and parse the CSV from Google Drive
+        Papa.parse(GOOGLE_SHEET_CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // Map the CSV headers to our expected format
+                directoryData = results.data.map(row => ({
+                    so_name: row['NAME OF SO'] || "",
+                    office_name: row['Office Name'] || "",
+                    villages: row['Village Name'] || ""
+                }));
                 
-                let soVal = "";
-                let officeVal = "";
-                let villageVal = "";
-
-                // Extract values using robust key matching
-                rowKeys.forEach(k => {
-                    const cleanKey = k.trim().toUpperCase();
-                    if (cleanKey === 'NAME OF SO') soVal = row[k];
-                    else if (cleanKey === 'OFFICE NAME') officeVal = row[k];
-                    else if (cleanKey === 'VILLAGE NAME') villageVal = row[k];
-                });
-
-                // Apply Forward Fill Logic
-                if (soVal && String(soVal).trim() !== "") {
-                    lastSO = String(soVal).trim();
-                }
-                
-                if (officeVal && String(officeVal).trim() !== "") {
-                    lastOffice = String(officeVal).trim();
-                }
-
-                const finalVillage = villageVal ? String(villageVal).trim() : "";
-
-                // Only add rows that actually contain village data, 
-                // OR add if it's a main SO entry without specific villages yet.
-                if (finalVillage !== "" || (lastSO !== "" && lastOffice !== "")) {
-                    parsedData.push({
-                        so: lastSO,
-                        office: lastOffice,
-                        village: finalVillage
-                    });
-                }
-            });
-
-            // Transition UI
-            loadingIndicator.classList.add('hidden');
-            uploadSection.classList.add('hidden');
-            appSection.classList.remove('hidden');
-            appSection.classList.add('flex'); // necessary for h-full to work correctly
-
-            // Initial Render
-            renderTable(parsedData);
-        }
-
-        function resetUI() {
-            loadingIndicator.classList.add('hidden');
-            dropZone.classList.remove('hidden');
-            fileInput.value = '';
-        }
-
-        // Search functionality
-        searchInput.addEventListener('input', (e) => {
-            currentSearchQuery = e.target.value.toLowerCase().trim();
-            
-            if (currentSearchQuery === "") {
-                renderTable(parsedData);
-                return;
+                loadingIndicator.style.display = 'none';
+                renderResults(directoryData);
+            },
+            error: function(err) {
+                loadingIndicator.innerText = "Error loading data. Make sure the Google Sheet is published to the web.";
+                console.error(err);
             }
-
-            const filteredData = parsedData.filter(row => {
-                return row.so.toLowerCase().includes(currentSearchQuery) ||
-                       row.office.toLowerCase().includes(currentSearchQuery) ||
-                       row.village.toLowerCase().includes(currentSearchQuery);
-            });
-
-            renderTable(filteredData);
         });
 
-        
-        // Helper to highlight matching text
-        function highlightText(text, query) {
-            if (!query) return escapeHTML(text);
+        function renderResults(data) {
+            resultsContainer.innerHTML = '';
             
-            // Escape special regex characters in query
-            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(${escapedQuery})`, 'gi');
-            
-            // First escape the HTML, then apply highlighting to avoid injecting HTML tags
-            const escapedText = escapeHTML(text);
-            
-            // We need to be careful not to break HTML entities. 
-            // For a simple app, standard replace is usually fine if we apply it carefully.
-            return escapedText.replace(regex, '<span class="highlight">$1</span>');
-        }
-
-        // Basic HTML escaper to prevent XSS
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    "'": '&#39;',
-                    '"': '&quot;'
-                }[tag])
-            );
-        }
-
-        // Render data to DOM
-        function renderTable(dataToRender) {
-            tableBody.innerHTML = '';
-            recordCount.textContent = dataToRender.length;
-
-            if (dataToRender.length === 0) {
-                tableBody.parentElement.classList.add('hidden');
-                noResults.classList.remove('hidden');
+            if (data.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center py-4">No matching records found.</p>';
                 return;
             }
-
-            tableBody.parentElement.classList.remove('hidden');
-            noResults.classList.add('hidden');
 
             const fragment = document.createDocumentFragment();
-
-            // Optimization: If dataset is huge, consider pagination or virtual scrolling.
-            // For typical postal data (< 5000 rows), direct DOM manipulation is fast enough.
-            // We will limit rendering to top 1000 items to prevent browser lag if search is empty on huge files,
-            // but generally filtering handles it.
-            const displayLimit = 1000; 
-            const renderData = dataToRender.slice(0, displayLimit);
-
-            renderData.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-blue-50 transition-colors duration-150 group';
+            
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-lg shadow border border-gray-100 hover:shadow-md transition-shadow';
                 
-                // SO Column
-                const tdSO = document.createElement('td');
-                tdSO.className = 'px-6 py-4 whitespace-normal text-sm text-slate-900 font-medium align-top';
-                tdSO.innerHTML = highlightText(row.so, currentSearchQuery);
-                
-                // Office Column
-                const tdOffice = document.createElement('td');
-                tdOffice.className = 'px-6 py-4 whitespace-normal text-sm text-slate-700 align-top';
-                tdOffice.innerHTML = highlightText(row.office, currentSearchQuery);
-                
-                // Village Column
-                const tdVillage = document.createElement('td');
-                tdVillage.className = 'px-6 py-4 whitespace-normal text-sm text-slate-600 align-top leading-relaxed';
-                tdVillage.innerHTML = highlightText(row.village, currentSearchQuery);
-
-                tr.appendChild(tdSO);
-                tr.appendChild(tdOffice);
-                tr.appendChild(tdVillage);
-                
-                fragment.appendChild(tr);
+                card.innerHTML = `
+                    <h2 class="text-xl font-semibold text-gray-800 mb-1">${item.office_name || 'N/A'}</h2>
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mb-3">
+                        ${item.so_name || 'N/A'}
+                    </span>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        <strong class="text-gray-700">Villages:</strong> ${item.villages || 'None listed'}
+                    </p>
+                `;
+                fragment.appendChild(card);
             });
-
-            tableBody.appendChild(fragment);
-
-            // Add warning if truncated
-            if (dataToRender.length > displayLimit) {
-                const trWarning = document.createElement('tr');
-                const tdWarning = document.createElement('td');
-                tdWarning.colSpan = 3;
-                tdWarning.className = 'px-6 py-4 text-center text-sm text-slate-500 italic bg-slate-50';
-                tdWarning.textContent = `Showing first ${displayLimit} results. Refine your search to see more.`;
-                tableBody.appendChild(trWarning);
-            }
+            
+            resultsContainer.appendChild(fragment);
         }
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            const filteredData = directoryData.filter(item => {
+                return (item.so_name && item.so_name.toLowerCase().includes(query)) ||
+                       (item.office_name && item.office_name.toLowerCase().includes(query)) ||
+                       (item.villages && item.villages.toLowerCase().includes(query));
+            });
+            
+            renderResults(filteredData);
+        });
     </script>
 </body>
 </html>
